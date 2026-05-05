@@ -3,17 +3,10 @@ language: cpp
 os:
   - linux
 
-compiler:
-  - gcc
-  - clang
-
 dist: focal
 
-addons:
-  apt:
-    packages:
-      - cmake
+services:
+  - docker
 
 script:
-  - cmake -S . -B _build
-  - cmake --build _build
+  - docker build -t logger .
