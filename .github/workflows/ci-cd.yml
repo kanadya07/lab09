@@ -1,0 +1,64 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+
+      - name: Cache Hunter packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.hunter
+          key: hunter-${{ runner.os }}-${{ hashFiles('cmake/Hunter/config.cmake', 'CMakeLists.txt') }}
+          restore-keys: |
+            hunter-${{ runner.os }}-
+
+      - name: Configure
+        run: cmake -S . -B _build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build _build --config Release
+
+      - name: Run tests
+        run: ctest --test-dir _build --output-on-failure
+
+      - name: Build package
+        run: cmake --build _build --target package
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab09-package
+          path: _build/*.tar.gz
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: _build/*.tar.gz
+          body_path: RELEASE.md
+
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t lab09-demo .
