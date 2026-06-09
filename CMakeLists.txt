@@ -38,7 +38,7 @@ if(BUILD_TESTS)
     tests/account_test.cpp
     tests/transaction_test.cpp
   )
-  target_link_libraries(check PRIVATE banking GTest::main GTest::gmock)
+  target_link_libraries(check PRIVATE banking GTest::main)
   add_test(NAME check COMMAND check)
 endif()
 
