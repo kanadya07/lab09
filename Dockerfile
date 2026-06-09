@@ -5,7 +5,7 @@ RUN apt update && apt install -yy gcc g++ cmake make ca-certificates
 COPY . /print
 WORKDIR /print
 
-RUN cmake -S . -B _build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=_install -DBUILD_TESTS=OFF
+RUN mkdir _build && cd _build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/print/_install -DBUILD_TESTS=OFF
 RUN cmake --build _build
 RUN cmake --build _build --target install
 
